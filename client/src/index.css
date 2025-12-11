@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== DARK CARBON THEME ===== */
+/* Modern, elegant dark design inspired by Tasker/Linear */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Global dark background */
+body {
+  @apply bg-surface-primary text-text-primary;
+}
+
+/* Custom Scrollbar - Dark theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
+/* Smooth animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
+
+/* Drag overlay styles */
+[data-dnd-dragging="true"] {
+  cursor: grabbing !important;
+}
+
+/* Task card hover effects */
+.task-card-hover {
+  @apply hover:shadow-lg hover:shadow-black/20 hover:border-accent-blue transition-all duration-200;
+}
+
+/* Column drop indicator */
+.column-drop-active {
+  @apply border-accent-blue bg-blue-900/20;
+}
+
+/* User drop zone */
+.user-drop-zone {
+  @apply ring-2 ring-accent-green ring-offset-2 ring-offset-surface-primary;
+}
+
+/* Menu dropdown animation */
+.menu-dropdown {
+  animation: fadeIn 0.15s ease-out;
+}
+
+/* Priority colors - Dark theme */
+.priority-low {
+  @apply bg-badge-green text-badgeText-green;
+}
+.priority-medium {
+  @apply bg-badge-yellow text-badgeText-yellow;
+}
+.priority-high {
+  @apply bg-badge-pink text-badgeText-pink;
+}
+.priority-critical {
+  @apply bg-red-900/40 text-red-400;
+}
+
+/* Status column header colors - Dark theme */
+.status-pending {
+  @apply bg-amber-900/30 border-amber-700/50;
+}
+.status-in_progress {
+  @apply bg-blue-900/30 border-blue-700/50;
+}
+.status-review {
+  @apply bg-purple-900/30 border-purple-700/50;
+}
+.status-approved {
+  @apply bg-emerald-900/30 border-emerald-700/50;
+}
+.status-delivered {
+  @apply bg-green-900/30 border-green-700/50;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== React Big Calendar - Dark Theme ===== */
+
+.rbc-calendar {
+  @apply font-sans;
+}
+
+.rbc-header {
+  @apply py-2 text-text-secondary font-medium text-sm border-b border-surface-border bg-surface-elevated;
+}
+
+.rbc-month-view {
+  @apply border-0 rounded-lg;
+}
+
+.rbc-month-row {
+  @apply border-0 min-h-[100px];
+}
+
+.rbc-day-bg {
+  @apply border-surface-border hover:bg-surface-hover transition-colors;
+}
+
+.rbc-off-range-bg {
+  @apply bg-surface-secondary;
+}
+
+.rbc-today {
+  @apply bg-blue-900/30;
+}
+
+.rbc-event {
+  @apply p-0 !important;
+}
+
+.rbc-event:focus {
+  outline: none;
+}
+
+/* Fix grid borders */
+.rbc-day-bg + .rbc-day-bg {
+  @apply border-l border-surface-border;
+}
+
+.rbc-month-row + .rbc-month-row {
+  @apply border-t border-surface-border;
+}
+
+.rbc-header + .rbc-header {
+  @apply border-l border-surface-border;
+}
+
+/* Toolbar customization */
+.rbc-toolbar {
+  @apply flex-col-reverse sm:flex-row gap-4 mb-6 !important;
+}
+
+.rbc-toolbar-label {
+  @apply text-xl font-bold text-text-primary uppercase tracking-wide !important;
+}
+
+.rbc-btn-group {
+  @apply shadow-sm rounded-lg overflow-hidden border border-surface-border !important;
+}
+
+.rbc-btn-group button {
+  @apply bg-surface-card text-text-secondary border-r border-surface-border px-4 py-2 hover:bg-surface-hover transition focus:outline-none !important;
+}
+
+.rbc-btn-group button.rbc-active {
+  @apply bg-accent-blue text-white font-medium !important;
+}
+
+.rbc-btn-group button:last-child {
+  @apply border-r-0 !important;
+}
+
+/* Text colors */
+.rbc-date-cell {
+  @apply p-2 text-xs font-medium text-text-muted;
+}
+.rbc-current .rbc-date-cell {
+  @apply text-accent-blue font-bold;
+}
+.rbc-off-range .rbc-date-cell {
+  @apply text-gray-600;
+}
+
+/* Show more link */
+.rbc-show-more {
+  @apply text-xs text-text-muted hover:text-accent-blue font-medium ml-2 bg-transparent !important;
+}
+
+/* Form inputs - Dark theme override */
+input,
+textarea,
+select {
+  color-scheme: dark;
+}
+
+/* Modal backgrounds for dark theme */
+.modal-dark-overlay {
+  @apply bg-black/80;
+}
