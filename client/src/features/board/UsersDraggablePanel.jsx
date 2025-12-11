@@ -50,9 +50,17 @@ function DraggableUser({ user }) {
       `}
     >
       <GripVertical size={14} className="text-text-muted" />
-      <div className={`w-8 h-8 rounded-full ${getAvatarColor(user.full_name)} flex items-center justify-center text-white font-bold text-sm`}>
-        {getInitial(user.full_name)}
-      </div>
+      {user.avatar_url ? (
+        <img 
+          src={user.avatar_url} 
+          alt={user.full_name}
+          className="w-8 h-8 rounded-full object-cover"
+        />
+      ) : (
+        <div className={`w-8 h-8 rounded-full ${getAvatarColor(user.full_name)} flex items-center justify-center text-white font-bold text-sm`}>
+          {getInitial(user.full_name)}
+        </div>
+      )}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-text-primary truncate">
           {user.full_name || 'Sin nombre'}

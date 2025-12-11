@@ -447,10 +447,20 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3 pl-4 border-l border-surface-border">
                 <a 
                   href="/settings" 
-                  className="w-9 h-9 rounded-full bg-badge-blue text-badgeText-blue flex items-center justify-center font-bold hover:ring-2 hover:ring-accent-blue transition-all"
+                  className="w-9 h-9 rounded-full overflow-hidden hover:ring-2 hover:ring-accent-blue transition-all"
                   title="Configuración de Perfil"
                 >
-                  {profile?.full_name ? profile.full_name[0] : (user?.email ? user.email[0].toUpperCase() : 'U')}
+                  {profile?.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt={profile.full_name || 'Avatar'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-badge-blue text-badgeText-blue flex items-center justify-center font-bold">
+                      {profile?.full_name ? profile.full_name[0] : (user?.email ? user.email[0].toUpperCase() : 'U')}
+                    </div>
+                  )}
                 </a>
                 <a
                   href="/settings"

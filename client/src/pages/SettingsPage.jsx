@@ -50,21 +50,77 @@ export default function SettingsPage() {
     setLoading(false);
   };
 
-  const handleAvatarChange = (e) => {
+  // Compress image using canvas
+  const compressImage = (file, maxWidth = 400, maxHeight = 400, quality = 0.8) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions maintaining aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to blob
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type and size
+      // Validate file type
       if (!file.type.startsWith('image/')) {
         setMessage({ type: 'error', text: 'Por favor selecciona una imagen.' });
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        setMessage({ type: 'error', text: 'La imagen debe ser menor a 2MB.' });
-        return;
-      }
       
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
+      setMessage({ type: 'info', text: 'Procesando imagen...' });
+      
+      try {
+        // Compress the image automatically
+        const compressedFile = await compressImage(file);
+        
+        setAvatarFile(compressedFile);
+        setAvatarPreview(URL.createObjectURL(compressedFile));
+        setMessage({ type: '', text: '' });
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        setMessage({ type: 'error', text: 'Error al procesar la imagen.' });
+      }
     }
   };
 
