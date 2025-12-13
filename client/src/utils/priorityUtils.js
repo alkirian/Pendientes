@@ -44,12 +44,27 @@ export function calculateAutoPriority(deadline, manualPriority = null) {
 export function formatDeadline(deadline) {
   if (!deadline) return null;
   
-  const deadlineDate = new Date(deadline);
+  // Parse deadline - handle both ISO strings and date-only strings
+  // For date-only strings like "2024-12-15", parse as local date (not UTC)
+  let deadlineDate;
+  if (typeof deadline === 'string' && deadline.length === 10) {
+    // Date-only format: YYYY-MM-DD - parse as local
+    const [year, month, day] = deadline.split('-').map(Number);
+    deadlineDate = new Date(year, month - 1, day);
+  } else {
+    deadlineDate = new Date(deadline);
+  }
+  
+  // Get today at midnight local time
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  
+  // Get deadline at midnight local time
   deadlineDate.setHours(0, 0, 0, 0);
 
-  const daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+  // Calculate difference in days
+  const diffTime = deadlineDate.getTime() - today.getTime();
+  const daysUntilDeadline = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
   if (daysUntilDeadline < 0) {
     return `Vencido hace ${Math.abs(daysUntilDeadline)} día${Math.abs(daysUntilDeadline) !== 1 ? 's' : ''}`;
