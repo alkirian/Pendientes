@@ -140,10 +140,10 @@ export default function UsersDraggablePanel({ isUserDragging, onDragStart, onDra
       {!isCollapsed && (
         <>
           <p className="text-xs text-text-muted mb-3">
-            Arrastra un usuario sobre una tarea para asignarlo
+            Arrastra un usuario sobre un proyecto para asignarlo
           </p>
           
-          <div className="space-y-2 max-h-80 overflow-y-auto custom-scrollbar">
+          <div className="space-y-2">
             {users.length === 0 ? (
               <div className="text-center py-4 text-text-muted text-sm">
                 No hay usuarios registrados
@@ -153,13 +153,6 @@ export default function UsersDraggablePanel({ isUserDragging, onDragStart, onDra
                 <DraggableUser key={user.id} user={user} />
               ))
             )}
-          </div>
-
-          {/* Help tip */}
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-xs text-blue-700">
-              💡 <strong>Tip:</strong> También puedes usar el menú de 3 puntos en cada tarea o el botón + para asignar rápidamente.
-            </p>
           </div>
         </>
       )}

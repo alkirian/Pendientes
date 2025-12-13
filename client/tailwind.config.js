@@ -4,25 +4,25 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Dark Carbon Theme - Modern & Elegant
+        // Theme-aware colors using CSS variables
         surface: {
-          primary: '#121212',    // Main background (almost black)
-          secondary: '#1a1a1a',  // Sidebar/panels
-          card: '#1e1e1e',       // Card backgrounds
-          elevated: '#252525',   // Elevated/hover surfaces
-          border: '#2e2e2e',     // Borders (subtle)
-          hover: '#2a2a2a',      // Hover states
+          primary: 'var(--surface-primary)',
+          secondary: 'var(--surface-secondary)',
+          card: 'var(--surface-card)',
+          elevated: 'var(--surface-elevated)',
+          border: 'var(--surface-border)',
+          hover: 'var(--surface-hover)',
         },
-        // Text colors
         text: {
-          primary: '#f5f5f5',    // Main text (off-white)
-          secondary: '#a1a1aa',  // Secondary text
-          muted: '#71717a',      // Muted text
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
         },
-        // Accent colors - Vibrant on dark
+        // Accent colors - same for both themes
         accent: {
           blue: '#3b82f6',
           green: '#22c55e',
@@ -33,28 +33,27 @@ export default {
           orange: '#f97316',
           cyan: '#06b6d4',
         },
-        // Badge backgrounds - Darker versions
+        // Badge backgrounds
         badge: {
-          pink: '#4a1942',
-          blue: '#1e3a5f',
-          green: '#14412a',
-          yellow: '#4a3c1a',
-          purple: '#3b1f5c',
-          orange: '#4a2a1a',
-          gray: '#2a2a2a',
+          pink: 'var(--badge-pink)',
+          blue: 'var(--badge-blue)',
+          green: 'var(--badge-green)',
+          yellow: 'var(--badge-yellow)',
+          purple: 'var(--badge-purple)',
+          orange: 'var(--badge-orange)',
+          gray: 'var(--badge-gray)',
         },
-        // Badge text colors - Brighter on dark
+        // Badge text colors
         badgeText: {
-          pink: '#f472b6',
-          blue: '#60a5fa',
-          green: '#4ade80',
-          yellow: '#fcd34d',
-          purple: '#c084fc',
-          orange: '#fb923c',
+          pink: 'var(--badge-text-pink)',
+          blue: 'var(--badge-text-blue)',
+          green: 'var(--badge-text-green)',
+          yellow: 'var(--badge-text-yellow)',
+          purple: 'var(--badge-text-purple)',
+          orange: 'var(--badge-text-orange)',
         }
       },
     },
   },
   plugins: [],
 }
-

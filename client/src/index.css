@@ -2,8 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== DARK CARBON THEME ===== */
-/* Modern, elegant dark design inspired by Tasker/Linear */
+/* ===== THEME VARIABLES ===== */
+
+/* Light Theme */
+:root,
+.light {
+  /* Surfaces */
+  --surface-primary: #f8fafc;
+  --surface-secondary: #f1f5f9;
+  --surface-card: #ffffff;
+  --surface-elevated: #f8fafc;
+  --surface-border: #e2e8f0;
+  --surface-hover: #f1f5f9;
+
+  /* Text */
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+
+  /* Badges */
+  --badge-pink: #fce7f3;
+  --badge-blue: #dbeafe;
+  --badge-green: #dcfce7;
+  --badge-yellow: #fef3c7;
+  --badge-purple: #f3e8ff;
+  --badge-orange: #ffedd5;
+  --badge-gray: #f1f5f9;
+
+  /* Badge text */
+  --badge-text-pink: #be185d;
+  --badge-text-blue: #1d4ed8;
+  --badge-text-green: #15803d;
+  --badge-text-yellow: #a16207;
+  --badge-text-purple: #7e22ce;
+  --badge-text-orange: #c2410c;
+}
+
+/* Dark Theme */
+.dark {
+  /* Surfaces */
+  --surface-primary: #121212;
+  --surface-secondary: #1a1a1a;
+  --surface-card: #1e1e1e;
+  --surface-elevated: #252525;
+  --surface-border: #2e2e2e;
+  --surface-hover: #2a2a2a;
+
+  /* Text */
+  --text-primary: #f5f5f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+
+  /* Badges */
+  --badge-pink: #4a1942;
+  --badge-blue: #1e3a5f;
+  --badge-green: #14412a;
+  --badge-yellow: #4a3c1a;
+  --badge-purple: #3b1f5c;
+  --badge-orange: #4a2a1a;
+  --badge-gray: #2a2a2a;
+
+  /* Badge text */
+  --badge-text-pink: #f472b6;
+  --badge-text-blue: #60a5fa;
+  --badge-text-green: #4ade80;
+  --badge-text-yellow: #fcd34d;
+  --badge-text-purple: #c084fc;
+  --badge-text-orange: #fb923c;
+}
+
+/* ===== BASE STYLES ===== */
 
 html,
 body,
@@ -11,31 +79,36 @@ body,
   height: 100%;
 }
 
-/* Global dark background */
+/* Global background */
 body {
-  @apply bg-surface-primary text-text-primary;
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-/* Custom Scrollbar - Dark theme */
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--surface-secondary);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
+  background: var(--surface-border);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: var(--text-muted);
 }
 
-/* Smooth animations */
+/* ===== ANIMATIONS ===== */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -66,32 +139,30 @@ body {
   animation: scaleIn 0.2s ease-out;
 }
 
-/* Drag overlay styles */
+/* ===== DRAG & DROP ===== */
+
 [data-dnd-dragging="true"] {
   cursor: grabbing !important;
 }
 
-/* Task card hover effects */
 .task-card-hover {
   @apply hover:shadow-lg hover:shadow-black/20 hover:border-accent-blue transition-all duration-200;
 }
 
-/* Column drop indicator */
 .column-drop-active {
-  @apply border-accent-blue bg-blue-900/20;
+  @apply border-accent-blue bg-blue-500/10;
 }
 
-/* User drop zone */
 .user-drop-zone {
-  @apply ring-2 ring-accent-green ring-offset-2 ring-offset-surface-primary;
+  @apply ring-2 ring-accent-green ring-offset-2;
 }
 
-/* Menu dropdown animation */
 .menu-dropdown {
   animation: fadeIn 0.15s ease-out;
 }
 
-/* Priority colors - Dark theme */
+/* ===== PRIORITY BADGES ===== */
+
 .priority-low {
   @apply bg-badge-green text-badgeText-green;
 }
@@ -99,144 +170,132 @@ body {
   @apply bg-badge-yellow text-badgeText-yellow;
 }
 .priority-high {
-  @apply bg-badge-pink text-badgeText-pink;
-}
-.priority-critical {
-  @apply bg-red-900/40 text-red-400;
+  @apply bg-accent-red text-white;
 }
 
-/* Status column header colors - Dark theme */
-.status-pending {
-  @apply bg-amber-900/30 border-amber-700/50;
-}
-.status-in_progress {
-  @apply bg-blue-900/30 border-blue-700/50;
-}
-.status-review {
-  @apply bg-purple-900/30 border-purple-700/50;
-}
-.status-approved {
-  @apply bg-emerald-900/30 border-emerald-700/50;
-}
-.status-delivered {
-  @apply bg-green-900/30 border-green-700/50;
-}
+/* ===== FORM INPUTS ===== */
 
-/* Line clamp utilities */
-.line-clamp-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ===== React Big Calendar - Dark Theme ===== */
-
-.rbc-calendar {
-  @apply font-sans;
-}
-
-.rbc-header {
-  @apply py-2 text-text-secondary font-medium text-sm border-b border-surface-border bg-surface-elevated;
-}
-
-.rbc-month-view {
-  @apply border-0 rounded-lg;
-}
-
-.rbc-month-row {
-  @apply border-0 min-h-[100px];
-}
-
-.rbc-day-bg {
-  @apply border-surface-border hover:bg-surface-hover transition-colors;
-}
-
-.rbc-off-range-bg {
-  @apply bg-surface-secondary;
-}
-
-.rbc-today {
-  @apply bg-blue-900/30;
-}
-
-.rbc-event {
-  @apply p-0 !important;
-}
-
-.rbc-event:focus {
-  outline: none;
-}
-
-/* Fix grid borders */
-.rbc-day-bg + .rbc-day-bg {
-  @apply border-l border-surface-border;
-}
-
-.rbc-month-row + .rbc-month-row {
-  @apply border-t border-surface-border;
-}
-
-.rbc-header + .rbc-header {
-  @apply border-l border-surface-border;
-}
-
-/* Toolbar customization */
-.rbc-toolbar {
-  @apply flex-col-reverse sm:flex-row gap-4 mb-6 !important;
-}
-
-.rbc-toolbar-label {
-  @apply text-xl font-bold text-text-primary uppercase tracking-wide !important;
-}
-
-.rbc-btn-group {
-  @apply shadow-sm rounded-lg overflow-hidden border border-surface-border !important;
-}
-
-.rbc-btn-group button {
-  @apply bg-surface-card text-text-secondary border-r border-surface-border px-4 py-2 hover:bg-surface-hover transition focus:outline-none !important;
-}
-
-.rbc-btn-group button.rbc-active {
-  @apply bg-accent-blue text-white font-medium !important;
-}
-
-.rbc-btn-group button:last-child {
-  @apply border-r-0 !important;
-}
-
-/* Text colors */
-.rbc-date-cell {
-  @apply p-2 text-xs font-medium text-text-muted;
-}
-.rbc-current .rbc-date-cell {
-  @apply text-accent-blue font-bold;
-}
-.rbc-off-range .rbc-date-cell {
-  @apply text-gray-600;
-}
-
-/* Show more link */
-.rbc-show-more {
-  @apply text-xs text-text-muted hover:text-accent-blue font-medium ml-2 bg-transparent !important;
-}
-
-/* Form inputs - Dark theme override */
-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
 textarea,
 select {
-  color-scheme: dark;
+  background-color: var(--surface-secondary);
+  border-color: var(--surface-border);
+  color: var(--text-primary);
 }
 
-/* Modal backgrounds for dark theme */
-.modal-dark-overlay {
-  @apply bg-black/80;
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* ===== BUTTONS ===== */
+
+.btn-primary {
+  @apply bg-accent-blue hover:bg-blue-600 text-white font-medium px-4 py-2 rounded-lg transition-colors;
+}
+
+.btn-secondary {
+  background-color: var(--surface-elevated);
+  color: var(--text-secondary);
+  @apply hover:bg-surface-hover font-medium px-4 py-2 rounded-lg transition-colors;
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+
+/* Safe area support for iPhones with notch */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Touch-friendly minimum sizes */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Smooth momentum scrolling */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Slide-in animation from left */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+/* Slide-down animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* Responsive card grid */
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Hide scrollbar on mobile but keep functionality */
+@media (max-width: 1024px) {
+  .hide-scrollbar-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar-mobile {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Active state feedback for touch */
+@media (hover: none) {
+  button:active,
+  a:active,
+  .interactive:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
 }

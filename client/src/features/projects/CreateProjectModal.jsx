@@ -41,7 +41,10 @@ export default function CreateProjectModal({ isOpen, onClose, onCreated, project
       setName('');
       setClient('');
       setDescription('');
-      setDeadline('');
+      // Default deadline: 7 days from now
+      const defaultDeadline = new Date();
+      defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+      setDeadline(defaultDeadline.toISOString().split('T')[0]);
       setPriority('medium');
       setSelectedMembers([]);
     }

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
@@ -7,6 +8,7 @@ import MyFocusPage from './pages/MyFocusPage';
 import CompleteProfilePage from './pages/CompleteProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import ArchivedPage from './pages/ArchivedPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 // Route that requires authentication
 const PrivateRoute = ({ children }) => {
@@ -33,43 +35,51 @@ const RequireProfileRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/complete-profile" element={
-          <PrivateRoute>
-            <CompleteProfilePage />
-          </PrivateRoute>
-        } />
-        <Route path="/" element={
-          <RequireProfileRoute>
-            <DashboardPage />
-          </RequireProfileRoute>
-        } />
-        <Route path="/focus" element={
-          <RequireProfileRoute>
-             <MyFocusPage />
-          </RequireProfileRoute>
-        } />
-        <Route path="/settings" element={
-          <RequireProfileRoute>
-            <SettingsPage />
-          </RequireProfileRoute>
-        } />
-        <Route path="/archive" element={
-          <RequireProfileRoute>
-            <ArchivedPage />
-          </RequireProfileRoute>
-        } />
-        <Route path="/projects/:id" element={
-          <RequireProfileRoute>
-            <ProjectDetailsPage />
-          </RequireProfileRoute>
-        } />
-      </Routes>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/complete-profile" element={
+            <PrivateRoute>
+              <CompleteProfilePage />
+            </PrivateRoute>
+          } />
+          <Route path="/" element={
+            <RequireProfileRoute>
+              <DashboardPage />
+            </RequireProfileRoute>
+          } />
+          <Route path="/focus" element={
+            <RequireProfileRoute>
+               <MyFocusPage />
+            </RequireProfileRoute>
+          } />
+          <Route path="/settings" element={
+            <RequireProfileRoute>
+              <SettingsPage />
+            </RequireProfileRoute>
+          } />
+          <Route path="/archive" element={
+            <RequireProfileRoute>
+              <ArchivedPage />
+            </RequireProfileRoute>
+          } />
+          <Route path="/notifications" element={
+            <RequireProfileRoute>
+              <NotificationsPage />
+            </RequireProfileRoute>
+          } />
+          <Route path="/projects/:id" element={
+            <RequireProfileRoute>
+              <ProjectDetailsPage />
+            </RequireProfileRoute>
+          } />
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
 export default App;
+
 

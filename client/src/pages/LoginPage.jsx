@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -43,8 +44,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-primary">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-surface-border">
+    <div className="flex min-h-screen items-center justify-center bg-surface-primary relative">
+      {/* Theme Toggle in corner */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      
+      <div className="w-full max-w-md p-8 space-y-6 bg-surface-card rounded-xl shadow-lg border border-surface-border">
         <h2 className="text-3xl font-bold text-center text-accent-blue">Pendientes Dashboard</h2>
         <p className="text-center text-text-secondary">{isLogin ? 'Acceso interno' : 'Registro de nuevo usuario'}</p>
         

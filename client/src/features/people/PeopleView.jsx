@@ -14,7 +14,7 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
   const fetchUsers = async () => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name');
+      .select('id, full_name, avatar_url');
     
     if (error) console.error(error);
     else setAllUsers(data || []);
@@ -98,8 +98,18 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
              <button className="p-1 hover:bg-surface-hover rounded-full text-text-muted transition-colors">
                 {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
              </button>
-             <div className={`w-10 h-10 rounded-full ${getAvatarColor(user.full_name)} flex items-center justify-center text-white font-bold shadow-sm relative`}>
-               {getInitial(user.full_name)}
+             <div className="relative">
+               {user.avatar_url ? (
+                 <img 
+                   src={user.avatar_url} 
+                   alt={user.full_name}
+                   className="w-10 h-10 rounded-full object-cover shadow-sm"
+                 />
+               ) : (
+                 <div className={`w-10 h-10 rounded-full ${getAvatarColor(user.full_name)} flex items-center justify-center text-white font-bold shadow-sm`}>
+                    {getInitial(user.full_name)}
+                 </div>
+               )}
                {/* Workload Counter Bubble */}
                <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border-2 border-surface-card ${
                  userProjects.length > 5 ? 'bg-accent-red text-white' : 

@@ -17,7 +17,7 @@ function DroppablePrioritySection({ priority, label, icon: Icon, projects, color
   return (
     <div 
       ref={setNodeRef}
-      className={`mb-8 p-4 rounded-xl transition-all duration-200 ${
+      className={`mb-8 p-4 rounded-xl transition-all duration-200 min-h-[120px] ${
         isOver 
           ? 'bg-surface-elevated ring-2 ring-accent-blue scale-[1.01]' 
           : isProjectDragging 
@@ -46,6 +46,7 @@ function DroppablePrioritySection({ priority, label, icon: Icon, projects, color
               project={project}
               onQuickAction={onQuickAction}
               isUserDragging={isUserDragging}
+              isProjectDragging={isProjectDragging}
             />
           ))}
         </div>
@@ -57,6 +58,19 @@ function DroppablePrioritySection({ priority, label, icon: Icon, projects, color
         }`}>
           <p className="text-text-muted text-sm">
             {isOver ? '✨ Soltar para mover aquí' : 'Sin proyectos en esta categoría'}
+          </p>
+        </div>
+      )}
+
+      {/* Extra drop zone visible when dragging - to ensure drops work even with many cards */}
+      {isProjectDragging && projects.length > 0 && (
+        <div className={`mt-4 text-center py-4 rounded-lg border-2 border-dashed transition-all ${
+          isOver 
+            ? 'border-accent-blue bg-accent-blue/20' 
+            : 'border-surface-border/50 bg-surface-secondary/20'
+        }`}>
+          <p className="text-text-muted text-xs">
+            {isOver ? '✨ Soltar para agregar aquí' : '⬇️ Suelta aquí para agregar a esta prioridad'}
           </p>
         </div>
       )}

@@ -2,13 +2,16 @@ import { useEffect, useState, useCallback } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Plus, Briefcase, Target, Users, List, LayoutGrid, Settings, Archive } from 'lucide-react';
+import { LogOut, Plus, Briefcase, Target, Users as UsersIcon, List, LayoutGrid, Settings, Archive, Users } from 'lucide-react';
+import MobileNav from '../components/MobileNav';
 import ProjectCard from '../features/projects/ProjectCard';
 import CreateProjectModal from '../features/projects/CreateProjectModal';
 import UsersDraggablePanel from '../features/board/UsersDraggablePanel';
 import PeopleView from '../features/people/PeopleView';
 import ListView from '../features/list/ListView';
 import PriorityGridView from '../features/grid/PriorityGridView';
+import NotificationBell from '../components/NotificationBell';
+import ThemeToggle from '../components/ThemeToggle';
 
 const PROJECT_COLUMNS = [
   { id: 'pending', title: 'Pendientes' },
@@ -31,6 +34,9 @@ export default function DashboardPage() {
   const [activeId, setActiveId] = useState(null);
   const [activeType, setActiveType] = useState(null);
   const [activeData, setActiveData] = useState(null);
+  
+  // Mobile state
+  const [showMobileUsers, setShowMobileUsers] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -53,7 +59,7 @@ export default function DashboardPage() {
         tasks (id, status),
         project_members (
           user_id,
-          profiles (full_name)
+          profiles (full_name, avatar_url)
         )
       `)
       .neq('status', 'completed') // Exclude completed projects
@@ -350,27 +356,34 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-surface-primary flex flex-col">
         {/* Header */}
         <header className="bg-surface-card border-b border-surface-border sticky top-0 z-20">
-          <div className="px-6 py-4 flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-accent-blue rounded-xl flex items-center justify-center">
-                  <Briefcase size={20} className="text-white" />
+          <div className="px-4 lg:px-6 py-3 lg:py-4 flex justify-between items-center">
+            {/* Left Section - Menu + Logo */}
+            <div className="flex items-center gap-3">
+              {/* Mobile Nav */}
+              <MobileNav viewMode={viewMode} setViewMode={setViewMode} />
+              
+              {/* Logo */}
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-accent-blue rounded-xl flex items-center justify-center">
+                  <Briefcase size={18} className="text-white lg:hidden" />
+                  <Briefcase size={20} className="text-white hidden lg:block" />
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-text-primary">
-                    Pendientes Dashboard
+                <div className="hidden sm:block">
+                  <h1 className="text-lg lg:text-xl font-bold text-text-primary">
+                    Pendientes
                   </h1>
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs text-text-secondary hidden lg:block">
                     Gestión de proyectos
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            {/* Center Section - Desktop Nav (hidden on mobile) */}
+            <div className="hidden lg:flex items-center gap-4">
               <a 
                 href="/focus"
-                className="hidden md:flex items-center gap-2 text-text-secondary hover:text-accent-blue font-medium px-3 py-2 rounded-lg hover:bg-surface-hover transition"
+                className="flex items-center gap-2 text-text-secondary hover:text-accent-blue font-medium px-3 py-2 rounded-lg hover:bg-surface-hover transition"
               >
                 <Target size={20} />
                 Mi Enfoque
@@ -378,14 +391,14 @@ export default function DashboardPage() {
 
               <a 
                 href="/archive"
-                className="hidden md:flex items-center gap-2 text-text-secondary hover:text-emerald-400 font-medium px-3 py-2 rounded-lg hover:bg-surface-hover transition"
+                className="flex items-center gap-2 text-text-secondary hover:text-emerald-400 font-medium px-3 py-2 rounded-lg hover:bg-surface-hover transition"
               >
                 <Archive size={20} />
                 Archivo
               </a>
 
-              {/* View Mode Toggle */}
-              <div className="hidden md:flex items-center bg-surface-secondary rounded-lg p-1 border border-surface-border">
+              {/* View Mode Toggle - Desktop */}
+              <div className="flex items-center bg-surface-secondary rounded-lg p-1 border border-surface-border">
                 <button
                   onClick={() => {
                     setViewMode('grid');
@@ -399,7 +412,7 @@ export default function DashboardPage() {
                   title="Vista Grid por Prioridad"
                 >
                   <LayoutGrid size={16} />
-                  <span className="hidden lg:inline">Prioridad</span>
+                  <span className="hidden xl:inline">Prioridad</span>
                 </button>
                 <button
                   onClick={() => {
@@ -413,8 +426,8 @@ export default function DashboardPage() {
                   }`}
                   title="Vista por Personas"
                 >
-                  <Users size={16} />
-                  <span className="hidden lg:inline">Personas</span>
+                  <UsersIcon size={16} />
+                  <span className="hidden xl:inline">Personas</span>
                 </button>
                 <button
                   onClick={() => {
@@ -429,22 +442,40 @@ export default function DashboardPage() {
                   title="Vista Lista Compacta"
                 >
                   <List size={16} />
-                  <span className="hidden lg:inline">Lista</span>
+                  <span className="hidden xl:inline">Lista</span>
                 </button>
               </div>
+            </div>
 
+            {/* Right Section - Actions */}
+            <div className="flex items-center gap-2 lg:gap-3">
+              {/* Mobile Users Toggle */}
+              <button
+                onClick={() => setShowMobileUsers(!showMobileUsers)}
+                className={`lg:hidden p-2 rounded-lg transition ${
+                  showMobileUsers 
+                    ? 'bg-accent-blue text-white' 
+                    : 'bg-surface-secondary text-text-secondary hover:bg-surface-hover'
+                }`}
+                title="Ver usuarios"
+              >
+                <Users size={20} />
+              </button>
+
+              {/* New Project Button */}
               <button 
                 onClick={() => {
                   setEditingProject(null);
                   setShowModal(true);
                 }}
-                className="bg-accent-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition"
+                className="bg-accent-blue hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-lg flex items-center gap-2 transition"
               >
                 <Plus size={20} />
-                <span className="hidden sm:inline">Nuevo Proyecto</span>
+                <span className="hidden sm:inline">Nuevo</span>
               </button>
               
-              <div className="flex items-center gap-3 pl-4 border-l border-surface-border">
+              {/* Desktop-only controls */}
+              <div className="hidden lg:flex items-center gap-3 pl-4 border-l border-surface-border">
                 <a 
                   href="/settings" 
                   className="w-9 h-9 rounded-full overflow-hidden hover:ring-2 hover:ring-accent-blue transition-all"
@@ -462,6 +493,8 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </a>
+                <NotificationBell />
+                <ThemeToggle />
                 <a
                   href="/settings"
                   className="p-2 hover:bg-surface-hover rounded-lg text-text-muted transition"
@@ -482,14 +515,21 @@ export default function DashboardPage() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Users Panel (Left Sidebar) */}
-          <aside className="w-72 p-4 border-r border-surface-border bg-surface-secondary overflow-y-auto hidden lg:block">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          {/* Mobile Users Panel - Slide-down */}
+          {showMobileUsers && (
+            <div className="lg:hidden border-b border-surface-border bg-surface-secondary p-4 animate-fade-in max-h-64 overflow-y-auto">
+              <UsersDraggablePanel />
+            </div>
+          )}
+
+          {/* Users Panel (Left Sidebar - Desktop) */}
+          <aside className="w-72 p-4 border-r border-surface-border bg-surface-secondary overflow-y-auto hidden lg:block flex-shrink-0">
             <UsersDraggablePanel />
           </aside>
 
           {/* Main View */}
-          <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
+          <main className="flex-1 overflow-x-auto overflow-y-auto p-4 lg:p-6">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-accent-blue"></div>
