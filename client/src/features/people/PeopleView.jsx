@@ -159,14 +159,15 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
     });
 
     return (
-      <div ref={setNodeRef} className="flex-shrink-0 w-80 lg:w-96 flex flex-col h-full bg-surface-secondary border-r border-surface-border">
+      <div ref={setNodeRef} className="flex-shrink-0 w-full lg:w-96 flex flex-col h-auto lg:h-full bg-surface-secondary border-b lg:border-b-0 lg:border-r border-surface-border">
+        {/* Header */}
         <div className="p-4 border-b border-surface-border bg-surface-card sticky top-0 z-10">
           <div className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
             isOver 
               ? 'bg-gray-100 border-gray-400 ring-2 ring-gray-400' 
               : 'bg-surface-elevated border-surface-border'
           }`}>
-            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
+            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold shrink-0">
               ?
             </div>
             <div>
@@ -176,19 +177,21 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {/* Project List */}
+        <div className="flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto p-4 flex lg:block gap-3 lg:space-y-3">
           {projects.length > 0 ? (
             sortByPriority(projects).map(project => (
-              <ProjectCard
-                key={`unassigned-${project.id}`}
-                uniqueId={`unassigned-${project.id}`}
-                project={project}
-                onQuickAction={onQuickAction}
-                isUserDragging={isUserDragging}
-              />
+              <div key={`unassigned-wrapper-${project.id}`} className="w-80 lg:w-full flex-shrink-0">
+                <ProjectCard
+                  uniqueId={`unassigned-${project.id}`}
+                  project={project}
+                  onQuickAction={onQuickAction}
+                  isUserDragging={isUserDragging}
+                />
+              </div>
             ))
            ) : (
-             <div className="h-48 border-2 border-dashed border-gray-200 rounded-xl flex flex-col gap-2 items-center justify-center text-text-muted text-sm">
+             <div className="w-full h-32 lg:h-48 border-2 border-dashed border-gray-200 rounded-xl flex flex-col gap-2 items-center justify-center text-text-muted text-sm">
                <span>📥</span>
                <span>Arrastra aquí para desasignar</span>
              </div>
@@ -199,13 +202,15 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
   }
 
   return (
-    <div className="flex h-full overflow-hidden bg-surface-card rounded-xl border border-surface-border">
-      {/* 1. Left Panel: Unassigned (Fixed Width) */}
-      <DroppableUnassignedColumn projects={unassigned} />
+    <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-surface-card rounded-xl border border-surface-border">
+      {/* 1. Unassigned Panel (Top on mobile, Left on desktop) */}
+      <div className="lg:h-full overflow-hidden flex-shrink-0">
+        <DroppableUnassignedColumn projects={unassigned} />
+      </div>
 
-      {/* 2. Right Panel: User Rows (Scrollable) */}
-      <div className="flex-1 h-full overflow-y-auto bg-surface-primary">
-        <div className="p-6 space-y-4 pb-20">
+      {/* 2. User Rows Panel (Scrollable) */}
+      <div className="flex-1 h-full overflow-y-auto bg-surface-primary custom-scrollbar">
+        <div className="p-4 lg:p-6 space-y-4 pb-20">
           
           {/* Header & Search */}
           <div className="flex items-center justify-between mb-2 flex-wrap gap-3">

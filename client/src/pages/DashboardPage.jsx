@@ -6,6 +6,7 @@ import { LogOut, Plus, Briefcase, Target, Users as UsersIcon, List, LayoutGrid, 
 import MobileNav from '../components/MobileNav';
 import ProjectCard from '../features/projects/ProjectCard';
 import CreateProjectModal from '../features/projects/CreateProjectModal';
+import UserAssignmentModal from '../features/projects/UserAssignmentModal';
 import UsersDraggablePanel from '../features/board/UsersDraggablePanel';
 import PeopleView from '../features/people/PeopleView';
 import ListView from '../features/list/ListView';
@@ -24,6 +25,8 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [projectToAssign, setProjectToAssign] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [toast, setToast] = useState(null); // { message, type }
   const [viewMode, setViewMode] = useState(() => {
@@ -191,7 +194,13 @@ export default function DashboardPage() {
         break;
       
       case 'assign':
-        showToast('ℹ️ Arrastra usuarios sobre la tarjeta para asignarlos al equipo', 'info');
+        {
+          const project = projects.find(p => p.id === projectId);
+          if (project) {
+            setProjectToAssign(project);
+            setShowAssignmentModal(true);
+          }
+        }
         break;
 
       case 'complete':
@@ -219,6 +228,39 @@ export default function DashboardPage() {
       
       default:
         break;
+    }
+  };
+
+  // Handle Team Assignment from Modal
+  const handleAssignMembers = async (projectId, selectedUserIds) => {
+    try {
+      // 1. Remove existing members
+      const { error: deleteError } = await supabase
+        .from('project_members')
+        .delete()
+        .eq('project_id', projectId);
+        
+      if (deleteError) throw deleteError;
+
+      // 2. Insert new members
+      if (selectedUserIds.length > 0) {
+        const toInsert = selectedUserIds.map(userId => ({
+          project_id: projectId,
+          user_id: userId
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('project_members')
+          .insert(toInsert);
+          
+        if (insertError) throw insertError;
+      }
+      
+      showToast('✅ Equipo actualizado correctamente');
+      fetchProjects();
+    } catch (error) {
+      console.error('Error assigning members:', error);
+      showToast('❌ Error al asignar miembros', 'error');
     }
   };
 
@@ -573,6 +615,15 @@ export default function DashboardPage() {
           onClose={() => { setShowModal(false); setEditingProject(null); }} 
           onCreated={fetchProjects} 
           projectToEdit={editingProject}
+        />
+
+        {/* User Assignment Modal */}
+        <UserAssignmentModal
+          isOpen={showAssignmentModal}
+          onClose={() => { setShowAssignmentModal(false); setProjectToAssign(null); }}
+          projectId={projectToAssign?.id}
+          currentMembers={projectToAssign?.project_members}
+          onSave={handleAssignMembers}
         />
 
         {/* Toast Notification */}

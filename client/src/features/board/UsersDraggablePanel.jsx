@@ -14,15 +14,15 @@ const ROLE_LABELS = {
 };
 
 function DraggableUser({ user }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `user-${user.id}`,
     data: { type: 'user', user }
   });
 
-  const style = transform ? {
+    /* const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
     zIndex: 1000,
-  } : undefined;
+  } : undefined; */
 
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
   
@@ -39,7 +39,7 @@ function DraggableUser({ user }) {
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      /* style={style}  <-- Removing transform to prevent overflow issues. Overlay handles the visual drag. */
       {...listeners}
       {...attributes}
       className={`

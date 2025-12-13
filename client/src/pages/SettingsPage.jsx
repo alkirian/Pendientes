@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Camera, Save, User } from 'lucide-react';
+import { ArrowLeft, Camera, Save, User, AlertTriangle, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ROLE_OPTIONS = [
@@ -196,8 +196,128 @@ export default function SettingsPage() {
     );
   }
 
+const DangerZone = () => {
+    const { logout, deleteAccount } = useAuth();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [confirmText, setConfirmText] = useState('');
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState(null);
+  
+    const handleDelete = async () => {
+      if (confirmText !== 'confirmar') return;
+      
+      setIsDeleting(true);
+      setDeleteError(null);
+      try {
+        await deleteAccount();
+        // Redirect handled by logout/provider
+      } catch (error) {
+        console.error(error);
+        setDeleteError('Error al eliminar cuenta. Verifica tu conexión o intenta más tarde.');
+        setIsDeleting(false);
+      }
+    };
+  
+    return (
+      <div className="mt-8 pt-8 border-t border-surface-border">
+        <h2 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
+          <AlertTriangle size={20} />
+          Zona de Peligro
+        </h2>
+  
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-surface-elevated rounded-lg border border-surface-border">
+            <div>
+              <h3 className="font-medium text-text-primary">Cerrar Sesión</h3>
+              <p className="text-sm text-text-muted">Cierra tu sesión actual en este dispositivo.</p>
+            </div>
+            <button 
+              type="button"
+              onClick={logout}
+              className="px-4 py-2 bg-surface-card border border-surface-border hover:bg-surface-hover text-text-primary rounded-lg transition-colors flex items-center gap-2 font-medium"
+            >
+              <LogOut size={16} />
+              Cerrar Sesión
+            </button>
+          </div>
+  
+          <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-900/30">
+            <div>
+              <h3 className="font-medium text-red-700 dark:text-red-400">Eliminar Cuenta</h3>
+              <p className="text-sm text-red-600/80 dark:text-red-400/80">
+                Esta acción es permanente. Se eliminarán todos tus datos y asignaciones.
+              </p>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+            >
+              Eliminar Cuenta
+            </button>
+          </div>
+        </div>
+  
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div className="bg-surface-card w-full max-w-md rounded-2xl p-6 shadow-xl border border-surface-border animate-scale-in">
+              <div className="flex items-center gap-3 text-red-600 mb-4">
+                 <AlertTriangle size={32} />
+                 <h3 className="text-xl font-bold">¿Eliminar cuenta?</h3>
+              </div>
+              
+              <p className="text-text-secondary mb-6 leading-relaxed">
+                Estás a punto de eliminar tu cuenta permanentemente. Esta acción 
+                <span className="font-bold text-text-primary"> no se puede deshacer</span>.
+                Se prohibirá tu acceso y se eliminarán tus datos personales.
+              </p>
+  
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-text-primary mb-2">
+                  Escribe <span className="font-mono font-bold select-all bg-surface-secondary px-1 rounded">confirmar</span> para continuar:
+                </label>
+                <input 
+                  type="text" 
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  className="w-full px-4 py-3 bg-surface-elevated border-2 border-surface-border focus:border-red-500 rounded-lg outline-none transition-colors"
+                  placeholder="confirmar"
+                  autoFocus
+                />
+              </div>
+  
+              {deleteError && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                  {deleteError}
+                </div>
+              )}
+  
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => { setShowDeleteModal(false); setConfirmText(''); setDeleteError(null); }}
+                  disabled={isDeleting}
+                  className="px-4 py-2 text-text-secondary hover:bg-surface-hover rounded-lg font-medium transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleDelete}
+                  disabled={confirmText !== 'confirmar' || isDeleting}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  {isDeleting ? 'Eliminando...' : 'Sí, eliminar permanentemente'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="min-h-screen bg-surface-primary pb-20">
       {/* Header */}
       <header className="bg-surface-card border-b border-surface-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -210,9 +330,10 @@ export default function SettingsPage() {
           <h1 className="text-xl font-bold text-text-primary">Configuración de Perfil</h1>
         </div>
       </header>
-
+  
       <main className="max-w-2xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="bg-surface-card rounded-xl shadow-sm border border-surface-border overflow-hidden">
+        {/* ... existing form content ... */}
           {/* Avatar Section */}
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 flex flex-col items-center">
             <div className="relative group">
@@ -247,7 +368,7 @@ export default function SettingsPage() {
             </div>
             <p className="text-white/80 text-sm mt-3">Haz clic para cambiar tu foto</p>
           </div>
-
+  
           {/* Form Fields */}
           <div className="p-6 space-y-5">
             {/* Name */}
@@ -263,7 +384,7 @@ export default function SettingsPage() {
                 className="w-full px-4 py-2.5 border border-surface-border rounded-lg bg-surface-elevated focus:ring-2 focus:ring-accent-blue focus:border-accent-blue outline-none transition-colors text-text-primary"
               />
             </div>
-
+  
             {/* Default Role */}
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1">
@@ -282,7 +403,7 @@ export default function SettingsPage() {
                 Este rol se sugerirá cuando te agreguen a un proyecto.
               </p>
             </div>
-
+  
             {/* Email (read-only) */}
             <div>
               <label className="block text-sm font-medium text-text-secondary mb-1">
@@ -298,18 +419,18 @@ export default function SettingsPage() {
                 El email no se puede cambiar.
               </p>
             </div>
-
+  
             {/* Message */}
             {message.text && (
               <div className={`p-3 rounded-lg text-sm ${
                 message.type === 'success' 
-                  ? 'bg-green-900/30 text-green-400 border border-green-700/50' 
-                  : 'bg-red-900/30 text-red-400 border border-red-700/50'
+                ? 'bg-green-900/30 text-green-400 border border-green-700/50' 
+                : 'bg-red-900/30 text-red-400 border border-red-700/50'
               }`}>
                 {message.text}
               </div>
             )}
-
+  
             {/* Submit Button */}
             <button
               type="submit"
@@ -330,6 +451,9 @@ export default function SettingsPage() {
             </button>
           </div>
         </form>
+  
+        {/* Usando component wrapper para evitar nesting issues, aunque conceptualmente está bien */}
+        <DangerZone />
       </main>
     </div>
   );

@@ -43,7 +43,7 @@ export default function CompleteProfilePage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface-primary">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-surface-border">
+      <div className="w-full max-w-md p-8 space-y-6 bg-surface-card rounded-xl shadow-lg border border-surface-border">
         <div className="text-center">
           <div className="w-16 h-16 bg-accent-blue rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -57,7 +57,7 @@ export default function CompleteProfilePage() {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">
+          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm text-center">
             {error}
           </div>
         )}
@@ -72,7 +72,7 @@ export default function CompleteProfilePage() {
               required
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full p-3 bg-white border border-surface-border rounded-lg text-text-primary focus:ring-2 focus:ring-accent-blue focus:outline-none transition placeholder:text-text-muted text-lg"
+              className="w-full p-3 bg-surface-elevated border border-surface-border rounded-lg text-text-primary focus:ring-2 focus:ring-accent-blue focus:outline-none transition placeholder:text-text-muted text-lg"
               placeholder="Ej: Juan Pérez"
               autoFocus
             />

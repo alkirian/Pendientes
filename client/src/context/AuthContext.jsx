@@ -91,6 +91,12 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/login';
   };
 
+  const deleteAccount = async () => {
+    const { error } = await supabase.rpc('delete_own_account');
+    if (error) throw error;
+    await logout();
+  };
+
   const loginWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -112,7 +118,8 @@ export const AuthProvider = ({ children }) => {
       loginWithGoogle, 
       loading, 
       needsProfileCompletion,
-      updateProfile 
+      updateProfile,
+      deleteAccount 
     }}>
       {!loading && children}
     </AuthContext.Provider>
