@@ -317,27 +317,36 @@ export default function DashboardPage() {
       else if (dropData?.type === 'person-drop') {
         const dragData = active.data.current;
         const projectId = dragData.project.id;
-        const userId = dropData.userId; // 'unassigned' or actual UUID
+        const targetUserId = dropData.userId; // 'unassigned' or actual UUID
+        
+        // Extract source user from uniqueId (format: "userId-projectId" or "unassigned-projectId")
+        const uniqueId = dragData.uniqueId || String(active.id);
+        const sourceUserId = uniqueId.includes('-') 
+          ? uniqueId.split('-')[0] 
+          : null;
         
         try {
-          // 1. Remove ALL existing members (enforce single owner rule)
-          const { error: deleteError } = await supabase
-            .from('project_members')
-            .delete()
-            .eq('project_id', projectId);
-            
-          if (deleteError) throw deleteError;
+          // If coming from a specific user (not unassigned), remove that user from the project
+          if (sourceUserId && sourceUserId !== 'unassigned') {
+            const { error: deleteError } = await supabase
+              .from('project_members')
+              .delete()
+              .eq('project_id', projectId)
+              .eq('user_id', sourceUserId);
+              
+            if (deleteError) throw deleteError;
+          }
 
-          // 2. If dropping on a specific user (not unassigned), add them
-          if (userId !== 'unassigned') {
+          // If dropping on a specific user (not unassigned), add them
+          if (targetUserId !== 'unassigned') {
             const { error: insertError } = await supabase
               .from('project_members')
-              .insert([{ project_id: projectId, user_id: userId }]);
+              .upsert([{ project_id: projectId, user_id: targetUserId }], { onConflict: 'project_id,user_id' });
               
             if (insertError) throw insertError;
             showToast('✅ Proyecto reasignado correctamente');
           } else {
-            showToast('✅ Proyecto movido a Sin Asignar');
+            showToast('✅ Usuario removido del proyecto');
           }
 
           fetchProjects();
