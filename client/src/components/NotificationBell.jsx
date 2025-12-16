@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Check, X, ExternalLink } from 'lucide-react';
+import { Bell, Check, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+
 
 const NOTIFICATION_ICONS = {
   project_assigned: '📋',

@@ -66,7 +66,6 @@ export default function DashboardPage() {
   };
 
   const fetchProjects = useCallback(async () => {
-    console.log('Fetching projects...');
     const { data, error } = await supabase
       .from('projects')
       .select(`
@@ -80,14 +79,11 @@ export default function DashboardPage() {
       .neq('status', 'completed') // Exclude completed projects
       .order('created_at', { ascending: false });
     
-    console.log('Projects fetched:', data);
-    if (error) console.error('Projects error:', error);
-    
     if (error) {
-      console.error(error);
       setLoading(false);
       return;
     }
+
 
     // Calculate stats per project
     const projectsWithStats = (data || []).map(project => {
