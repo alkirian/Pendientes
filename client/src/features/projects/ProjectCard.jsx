@@ -1,11 +1,9 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { MoreVertical, Edit3, Trash2, UserPlus, Calendar, ExternalLink, Clock, CheckCircle } from 'lucide-react';
 import { calculateAutoPriority, formatDeadline } from '../../utils/priorityUtils';
 
-export default function ProjectCard({ project, onQuickAction, isUserDragging, isProjectDragging = false, disableDrag = false, uniqueId }) {
-  const navigate = useNavigate();
+export default function ProjectCard({ project, onQuickAction, isUserDragging, isProjectDragging = false, disableDrag = false, uniqueId, onOpenModal }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showPriorityOptions, setShowPriorityOptions] = useState(false);
   const menuRef = useRef(null);
@@ -124,7 +122,9 @@ export default function ProjectCard({ project, onQuickAction, isUserDragging, is
     if (showMenu) {
       return;
     }
-    navigate(`/projects/${project.id}`);
+    if (onOpenModal) {
+      onOpenModal(project);
+    }
   };
 
   return (
@@ -177,12 +177,12 @@ export default function ProjectCard({ project, onQuickAction, isUserDragging, is
             {/* Dropdown Menu */}
             {showMenu && (
               <div className="absolute right-0 top-full mt-1 w-48 bg-surface-card rounded-lg border border-surface-border py-1 z-50 animate-fade-in">
-                <Link 
-                  to={`/projects/${project.id}`}
+                <button 
+                  onClick={() => { setShowMenu(false); if (onOpenModal) onOpenModal(project); }}
                   className="w-full px-4 py-2 text-left text-sm text-text-secondary hover:bg-surface-hover flex items-center gap-3"
                 >
-                  <ExternalLink size={14} /> Ver tablero
-                </Link>
+                  <ExternalLink size={14} /> Ver detalles
+                </button>
                 
                 <button 
                   onClick={() => handleAction('edit')}
@@ -329,14 +329,13 @@ export default function ProjectCard({ project, onQuickAction, isUserDragging, is
             </div>
           </div>
           
-          {/* View Tasks Link */}
-          <Link 
-            to={`/projects/${project.id}`}
+          {/* View Details Button */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); if (onOpenModal) onOpenModal(project); }}
             className="text-xs font-medium pointer-events-auto flex items-center gap-1 text-accent-blue hover:text-blue-500"
-            onClick={(e) => e.stopPropagation()}
           >
-            Ver tareas <ExternalLink size={10} />
-          </Link>
+            Ver detalles <ExternalLink size={10} />
+          </button>
         </div>
       </div>
 

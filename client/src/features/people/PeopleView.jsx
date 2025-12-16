@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useDroppable } from '@dnd-kit/core';
+import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { supabase } from '../../lib/supabase';
 import ProjectCard from '../projects/ProjectCard';
 import { ChevronDown, ChevronRight, Search, Filter, Minimize2, Maximize2 } from 'lucide-react';
 import { calculateAutoPriority } from '../../utils/priorityUtils';
 
-export default function PeopleView({ projects, onQuickAction, isUserDragging }) {
+export default function PeopleView({ projects, onQuickAction, isUserDragging, onOpenModal }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedUsers, setExpandedUsers] = useState({}); // Track individual expansions
@@ -136,6 +136,7 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
                          project={project}
                          onQuickAction={onQuickAction}
                          isUserDragging={isUserDragging}
+                         onOpenModal={onOpenModal}
                        />
                     </div>
                  ))}
@@ -151,50 +152,171 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
     );
   }
 
-  // Droppable component for unassigned column (Vertical Layout)
-  function DroppableUnassignedColumn({ projects }) {
+  // Draggable compact project row component
+  function DraggableProjectRow({ project, isUnassigned, assignedUsers, getPriorityDot, getAvatarColor, getInitial }) {
+    const uniqueId = isUnassigned ? `unassigned-${project.id}` : `compact-${project.id}`;
+    
+    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+      id: uniqueId,
+      data: { 
+        type: 'project', 
+        project,
+        uniqueId
+      }
+    });
+
+    const style = transform ? {
+      transform: `translate(${transform.x}px, ${transform.y}px)`,
+      zIndex: 50
+    } : undefined;
+
+    return (
+      <div 
+        ref={setNodeRef}
+        style={style}
+        {...listeners}
+        {...attributes}
+        className={`flex items-center gap-2 px-3 py-2.5 hover:bg-surface-hover cursor-grab active:cursor-grabbing transition-colors group ${
+          isUnassigned ? 'bg-surface-secondary/50' : ''
+        } ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
+      >
+        {/* Priority Dot */}
+        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityDot(project)}`} />
+        
+        {/* Project Name */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-text-primary truncate">
+            {project.name}
+          </p>
+          {project.client && (
+            <p className="text-[10px] text-text-muted truncate">{project.client}</p>
+          )}
+        </div>
+        
+        {/* Right side: Avatars or Unassigned badge */}
+        {isUnassigned ? (
+          <span className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-[10px] text-gray-500 dark:text-gray-400 flex-shrink-0">
+            Sin asignar
+          </span>
+        ) : (
+          <div className="flex -space-x-1.5 flex-shrink-0">
+            {assignedUsers.slice(0, 3).map((u, idx) => (
+              <div 
+                key={u.id || idx}
+                title={u.name}
+                className={`w-5 h-5 rounded-full border border-surface-card flex items-center justify-center text-[8px] font-bold text-white ${getAvatarColor(u.name)}`}
+              >
+                {u.avatar ? (
+                  <img src={u.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  getInitial(u.name)
+                )}
+              </div>
+            ))}
+            {assignedUsers.length > 3 && (
+              <div className="w-5 h-5 rounded-full border border-surface-card bg-gray-400 flex items-center justify-center text-[8px] font-bold text-white">
+                +{assignedUsers.length - 3}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Compact "All Projects" panel component
+  function CompactAllProjectsPanel({ allProjects, unassignedIds }) {
+    const [panelSearch, setPanelSearch] = useState('');
     const { setNodeRef, isOver } = useDroppable({
       id: 'unassigned-column',
       data: { type: 'person-drop', userId: 'unassigned' }
     });
 
+    // Filter projects based on search
+    const filteredProjects = allProjects.filter(p => 
+      p.name.toLowerCase().includes(panelSearch.toLowerCase()) ||
+      p.client?.toLowerCase().includes(panelSearch.toLowerCase())
+    );
+
+    // Priority indicator
+    const getPriorityDot = (project) => {
+      const priority = calculateAutoPriority(project.deadline, project.priority);
+      const colors = {
+        high: 'bg-red-500',
+        medium: 'bg-yellow-500',
+        low: 'bg-green-500'
+      };
+      return colors[priority] || colors.low;
+    };
+
+    // Check if project is unassigned
+    const isUnassigned = (projectId) => unassignedIds.has(projectId);
+
+    // Get assigned users for a project
+    const getAssignedUsers = (project) => {
+      return (project.project_members || []).map(m => ({
+        id: m.user_id,
+        name: m.profiles?.full_name || allUsers.find(u => u.id === m.user_id)?.full_name || '?',
+        avatar: m.profiles?.avatar_url || allUsers.find(u => u.id === m.user_id)?.avatar_url
+      }));
+    };
+
     return (
-      <div ref={setNodeRef} className="flex-shrink-0 w-full lg:w-96 flex flex-col h-auto lg:h-full bg-surface-secondary border-b lg:border-b-0 lg:border-r border-surface-border">
+      <div 
+        ref={setNodeRef} 
+        className={`flex-shrink-0 w-full lg:w-72 flex flex-col h-auto lg:h-full bg-surface-secondary border-b lg:border-b-0 lg:border-r border-surface-border transition-all ${
+          isOver ? 'ring-2 ring-accent-blue' : ''
+        }`}
+      >
         {/* Header */}
-        <div className="p-4 border-b border-surface-border bg-surface-card sticky top-0 z-10">
-          <div className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
-            isOver 
-              ? 'bg-gray-100 border-gray-400 ring-2 ring-gray-400' 
-              : 'bg-surface-elevated border-surface-border'
-          }`}>
-            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold shrink-0">
-              ?
+        <div className="p-3 border-b border-surface-border bg-surface-card sticky top-0 z-10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">📋</span>
+              <h3 className="font-bold text-text-primary text-sm">Todos</h3>
+              <span className="px-1.5 py-0.5 bg-surface-elevated rounded-full text-xs font-medium text-text-muted">
+                {allProjects.length}
+              </span>
             </div>
-            <div>
-              <h3 className="font-bold text-text-primary">Sin Asignar</h3>
-              <p className="text-sm text-text-secondary">{projects.length} proyecto{projects.length !== 1 ? 's' : ''}</p>
-            </div>
+          </div>
+          {/* Search */}
+          <div className="relative">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input 
+              type="text"
+              placeholder="Buscar proyecto..."
+              value={panelSearch}
+              onChange={(e) => setPanelSearch(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-surface-elevated border border-surface-border rounded-lg text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-accent-blue focus:outline-none"
+            />
           </div>
         </div>
         
-        {/* Project List */}
-        <div className="flex-1 overflow-x-auto lg:overflow-x-hidden lg:overflow-y-auto p-4 flex lg:block gap-3 lg:space-y-3">
-          {projects.length > 0 ? (
-            sortByPriority(projects).map(project => (
-              <div key={`unassigned-wrapper-${project.id}`} className="w-80 lg:w-full flex-shrink-0">
-                <ProjectCard
-                  uniqueId={`unassigned-${project.id}`}
-                  project={project}
-                  onQuickAction={onQuickAction}
-                  isUserDragging={isUserDragging}
-                />
-              </div>
-            ))
-           ) : (
-             <div className="w-full h-32 lg:h-48 border-2 border-dashed border-gray-200 rounded-xl flex flex-col gap-2 items-center justify-center text-text-muted text-sm">
-               <span>📥</span>
-               <span>Arrastra aquí para desasignar</span>
-             </div>
+        {/* Compact Project List */}
+        <div className="flex-1 overflow-y-auto">
+          {filteredProjects.length > 0 ? (
+            <div className="divide-y divide-surface-border">
+              {sortByPriority(filteredProjects).map(project => {
+                const unassigned = isUnassigned(project.id);
+                const assignedUsers = getAssignedUsers(project);
+                
+                return (
+                  <DraggableProjectRow
+                    key={`all-${project.id}`}
+                    project={project}
+                    isUnassigned={unassigned}
+                    assignedUsers={assignedUsers}
+                    getPriorityDot={getPriorityDot}
+                    getAvatarColor={getAvatarColor}
+                    getInitial={getInitial}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-4 text-center text-text-muted text-xs">
+              {panelSearch ? 'No se encontraron proyectos' : 'No hay proyectos'}
+            </div>
           )}
         </div>
       </div>
@@ -203,9 +325,12 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging }) 
 
   return (
     <div className="flex flex-col lg:flex-row h-full overflow-hidden bg-surface-card rounded-xl border border-surface-border">
-      {/* 1. Unassigned Panel (Top on mobile, Left on desktop) */}
+      {/* 1. All Projects Panel (Top on mobile, Left on desktop) */}
       <div className="lg:h-full overflow-hidden flex-shrink-0">
-        <DroppableUnassignedColumn projects={unassigned} />
+        <CompactAllProjectsPanel 
+          allProjects={projects} 
+          unassignedIds={new Set(unassigned.map(p => p.id))} 
+        />
       </div>
 
       {/* 2. User Rows Panel (Scrollable) */}

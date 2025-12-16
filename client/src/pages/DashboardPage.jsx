@@ -2,7 +2,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useSearchParams } from 'react-router-dom';
 import { LogOut, Plus, Briefcase, Target, Users as UsersIcon, List, LayoutGrid, Settings, Archive, Users } from 'lucide-react';
+
 import MobileNav from '../components/MobileNav';
 import ProjectCard from '../features/projects/ProjectCard';
 import CreateProjectModal from '../features/projects/CreateProjectModal';
@@ -13,6 +15,7 @@ import ListView from '../features/list/ListView';
 import PriorityGridView from '../features/grid/PriorityGridView';
 import NotificationBell from '../components/NotificationBell';
 import ThemeToggle from '../components/ThemeToggle';
+import ProjectDetailModal from '../features/projects/ProjectDetailModal';
 
 const PROJECT_COLUMNS = [
   { id: 'pending', title: 'Pendientes' },
@@ -29,6 +32,15 @@ export default function DashboardPage() {
   const [projectToAssign, setProjectToAssign] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
   const [toast, setToast] = useState(null); // { message, type }
+  
+  // Project Detail Modal state
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  const handleOpenProjectModal = (project) => {
+    setSelectedProject(project);
+    setShowDetailModal(true);
+  };
   const [viewMode, setViewMode] = useState(() => {
     return localStorage.getItem('dashboard-view-mode') || 'grid';
   });
@@ -96,9 +108,27 @@ export default function DashboardPage() {
     setLoading(false);
   }, []);
 
+  // URL params for opening project modal from notifications
+  const [searchParams, setSearchParams] = useSearchParams();
+
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  // Handle openProject query param (from notification click)
+  useEffect(() => {
+    const projectIdToOpen = searchParams.get('openProject');
+    if (projectIdToOpen && projects.length > 0) {
+      const projectToOpen = projects.find(p => p.id === projectIdToOpen);
+      if (projectToOpen) {
+        setSelectedProject(projectToOpen);
+        setShowDetailModal(true);
+        // Clear the URL param after opening
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, projects, setSearchParams]);
+
 
   // Quick Actions Handler
   const handleQuickAction = async (projectId, action, value) => {
@@ -320,9 +350,12 @@ export default function DashboardPage() {
         const targetUserId = dropData.userId; // 'unassigned' or actual UUID
         
         // Extract source user from uniqueId (format: "userId-projectId" or "unassigned-projectId")
+        // Since UUIDs contain dashes, we can't just split on '-'. 
+        // Instead, we remove the projectId from the end to get the sourceUserId
         const uniqueId = dragData.uniqueId || String(active.id);
-        const sourceUserId = uniqueId.includes('-') 
-          ? uniqueId.split('-')[0] 
+        const projectIdSuffix = `-${projectId}`;
+        const sourceUserId = uniqueId.endsWith(projectIdSuffix) 
+          ? uniqueId.slice(0, -projectIdSuffix.length)
           : null;
         
         try {
@@ -339,11 +372,15 @@ export default function DashboardPage() {
 
           // If dropping on a specific user (not unassigned), add them
           if (targetUserId !== 'unassigned') {
+            // Use insert - if already exists, it will be ignored (no error)
             const { error: insertError } = await supabase
               .from('project_members')
-              .upsert([{ project_id: projectId, user_id: targetUserId }], { onConflict: 'project_id,user_id' });
+              .insert([{ project_id: projectId, user_id: targetUserId }]);
               
-            if (insertError) throw insertError;
+            // Ignore duplicate key error (user already assigned)
+            if (insertError && !insertError.message?.includes('duplicate')) {
+              throw insertError;
+            }
             showToast('✅ Proyecto reasignado correctamente');
           } else {
             showToast('✅ Usuario removido del proyecto');
@@ -366,19 +403,34 @@ export default function DashboardPage() {
         const projectId = dropData.projectId;
         const projectTitle = projects.find(p => p.id === projectId)?.name || 'el proyecto';
 
-        // Insert into project_members
-        const { error } = await supabase
-          .from('project_members')
-          .upsert([{ project_id: projectId, user_id: userId }], { onConflict: 'project_id,user_id' });
-        
-        if (!error) {
-           showToast(`✅ ${userName} agregado al equipo de "${projectTitle}"`);
-           fetchProjects();
-        } else {
-           console.error('Error assigning team member:', error);
-           showToast('❌ Error al asignar usuario al equipo', 'error');
+        try {
+          // First check if already assigned
+          const { data: existing } = await supabase
+            .from('project_members')
+            .select('id')
+            .eq('project_id', projectId)
+            .eq('user_id', userId)
+            .maybeSingle();
+          
+          if (existing) {
+            showToast(`ℹ️ ${userName} ya está asignado a "${projectTitle}"`);
+          } else {
+            // Insert new assignment
+            const { error } = await supabase
+              .from('project_members')
+              .insert([{ project_id: projectId, user_id: userId }]);
+            
+            if (error) throw error;
+            
+            showToast(`✅ ${userName} agregado al equipo de "${projectTitle}"`);
+            fetchProjects();
+          }
+        } catch (error) {
+          console.error('Error assigning team member:', error);
+          showToast('❌ Error al asignar usuario al equipo', 'error');
         }
       }
+
     }
     
     resetDragState();
@@ -448,54 +500,36 @@ export default function DashboardPage() {
                 Archivo
               </a>
 
-              {/* View Mode Toggle - Desktop */}
-              <div className="flex items-center bg-surface-secondary rounded-lg p-1 border border-surface-border">
-                <button
-                  onClick={() => {
-                    setViewMode('grid');
-                    localStorage.setItem('dashboard-view-mode', 'grid');
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewMode === 'grid'
-                      ? 'bg-accent-blue text-white shadow-sm'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                  }`}
-                  title="Vista Grid por Prioridad"
-                >
-                  <LayoutGrid size={16} />
-                  <span className="hidden xl:inline">Prioridad</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setViewMode('people');
-                    localStorage.setItem('dashboard-view-mode', 'people');
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewMode === 'people'
-                      ? 'bg-accent-blue text-white shadow-sm'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                  }`}
-                  title="Vista por Personas"
-                >
-                  <UsersIcon size={16} />
-                  <span className="hidden xl:inline">Personas</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setViewMode('list');
-                    localStorage.setItem('dashboard-view-mode', 'list');
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewMode === 'list'
-                      ? 'bg-accent-blue text-white shadow-sm'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                  }`}
-                  title="Vista Lista Compacta"
-                >
-                  <List size={16} />
-                  <span className="hidden xl:inline">Lista</span>
-                </button>
+              {/* View Mode Toggle - Desktop (Nuevo diseño más intuitivo) */}
+              <div className="flex items-center bg-surface-secondary/80 rounded-xl p-1.5 border border-surface-border">
+                {[
+                  { id: 'grid', icon: LayoutGrid, label: 'Prioridad', desc: 'Por urgencia' },
+                  { id: 'people', icon: UsersIcon, label: 'Equipo', desc: 'Por persona' },
+                  { id: 'list', icon: List, label: 'Lista', desc: 'Vista compacta' },
+                ].map(({ id, icon: Icon, label, desc }) => (
+                  <button
+                    key={id}
+                    onClick={() => {
+                      setViewMode(id);
+                      localStorage.setItem('dashboard-view-mode', id);
+                    }}
+                    className={`group relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      viewMode === id
+                        ? 'bg-accent-blue text-white'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span>{label}</span>
+                    
+                    {/* Tooltip con descripción */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-surface-elevated border border-surface-border rounded-md text-xs text-text-muted whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                      {desc}
+                    </div>
+                  </button>
+                ))}
               </div>
+
             </div>
 
             {/* Right Section - Actions */}
@@ -586,15 +620,26 @@ export default function DashboardPage() {
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-accent-blue"></div>
               </div>
             ) : viewMode === 'list' ? (
-              <ListView projects={projects} onQuickAction={handleQuickAction} isUserDragging={activeType === 'user'} />
+              <ListView 
+                projects={projects} 
+                onQuickAction={handleQuickAction} 
+                isUserDragging={activeType === 'user'}
+                onOpenModal={handleOpenProjectModal}
+              />
             ) : viewMode === 'people' ? (
-              <PeopleView projects={projects} onQuickAction={handleQuickAction} isUserDragging={activeType === 'user'} />
+              <PeopleView 
+                projects={projects} 
+                onQuickAction={handleQuickAction} 
+                isUserDragging={activeType === 'user'}
+                onOpenModal={handleOpenProjectModal}
+              />
             ) : (
               <PriorityGridView 
                 projects={projects} 
                 onQuickAction={handleQuickAction} 
                 isUserDragging={activeType === 'user'} 
                 isProjectDragging={activeType === 'project'}
+                onOpenModal={handleOpenProjectModal}
               />
             )}
           </main>
@@ -633,6 +678,14 @@ export default function DashboardPage() {
           projectId={projectToAssign?.id}
           currentMembers={projectToAssign?.project_members}
           onSave={handleAssignMembers}
+        />
+
+        {/* Project Detail Modal */}
+        <ProjectDetailModal
+          isOpen={showDetailModal}
+          onClose={() => { setShowDetailModal(false); setSelectedProject(null); }}
+          project={selectedProject}
+          onUpdate={fetchProjects}
         />
 
         {/* Toast Notification */}

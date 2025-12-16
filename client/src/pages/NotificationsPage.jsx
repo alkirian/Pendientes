@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Check, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const NOTIFICATION_ICONS = {
   project_assigned: '📋',
@@ -14,6 +14,7 @@ const NOTIFICATION_ICONS = {
 
 export default function NotificationsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all' | 'unread'
@@ -72,6 +73,18 @@ export default function NotificationsPage() {
     if (diffHours < 24) return `hace ${diffHours}h`;
     if (diffDays < 7) return `hace ${diffDays} días`;
     return date.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  };
+
+  // Handle notification click - navigate with modal param
+  const handleNotificationClick = (notification) => {
+    if (!notification.read) markAsRead(notification.id);
+    
+    if (notification.link && notification.link.startsWith('/projects/')) {
+      const projectId = notification.link.replace('/projects/', '');
+      navigate(`/?openProject=${projectId}`);
+    } else if (notification.link) {
+      navigate(notification.link);
+    }
   };
 
   const filteredNotifications = filter === 'unread' 
@@ -154,9 +167,10 @@ export default function NotificationsPage() {
             {filteredNotifications.map((notification, idx) => (
               <div
                 key={notification.id}
-                className={`flex items-start gap-4 px-4 py-4 hover:bg-surface-hover transition ${
+                className={`flex items-start gap-4 px-4 py-4 hover:bg-surface-hover transition cursor-pointer ${
                   !notification.read ? 'bg-accent-blue/5' : ''
                 } ${idx > 0 ? 'border-t border-surface-border' : ''}`}
+                onClick={() => handleNotificationClick(notification)}
               >
                 {/* Icon */}
                 <div className="text-2xl flex-shrink-0 mt-1">
@@ -165,17 +179,9 @@ export default function NotificationsPage() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  {notification.link ? (
-                    <Link 
-                      to={notification.link}
-                      className="font-semibold text-text-primary hover:text-accent-blue block"
-                      onClick={() => !notification.read && markAsRead(notification.id)}
-                    >
-                      {notification.title}
-                    </Link>
-                  ) : (
-                    <p className="font-semibold text-text-primary">{notification.title}</p>
-                  )}
+                  <p className="font-semibold text-text-primary hover:text-accent-blue">
+                    {notification.title}
+                  </p>
                   {notification.message && (
                     <p className="text-sm text-text-secondary mt-1">{notification.message}</p>
                   )}

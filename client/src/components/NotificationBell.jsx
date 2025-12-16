@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, Check, X, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const NOTIFICATION_ICONS = {
   project_assigned: '📋',
@@ -14,6 +14,7 @@ const NOTIFICATION_ICONS = {
 
 export default function NotificationBell() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -110,6 +111,22 @@ export default function NotificationBell() {
     }
   };
 
+  // Handle notification click
+  const handleNotificationClick = (notification) => {
+    if (!notification.read) markAsRead(notification.id);
+    setIsOpen(false);
+    
+    // Check if it's a project notification and extract project ID
+    if (notification.link && notification.link.startsWith('/projects/')) {
+      const projectId = notification.link.replace('/projects/', '');
+      // Navigate to dashboard with modal parameter
+      navigate(`/?openProject=${projectId}`);
+    } else if (notification.link) {
+      // For other notification types, navigate normally
+      navigate(notification.link);
+    }
+  };
+
   // Format relative time
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -177,12 +194,7 @@ export default function NotificationBell() {
                   className={`flex items-start gap-3 px-4 py-3 hover:bg-surface-hover transition cursor-pointer border-b border-surface-border/50 ${
                     !notification.read ? 'bg-accent-blue/5' : ''
                   }`}
-                  onClick={() => {
-                    if (!notification.read) markAsRead(notification.id);
-                    if (notification.link) {
-                      setIsOpen(false);
-                    }
-                  }}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   {/* Icon */}
                   <div className="text-xl flex-shrink-0">
@@ -191,17 +203,9 @@ export default function NotificationBell() {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    {notification.link ? (
-                      <Link 
-                        to={notification.link}
-                        className="font-medium text-sm text-text-primary hover:text-accent-blue block"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {notification.title}
-                      </Link>
-                    ) : (
-                      <p className="font-medium text-sm text-text-primary">{notification.title}</p>
-                    )}
+                    <p className="font-medium text-sm text-text-primary hover:text-accent-blue">
+                      {notification.title}
+                    </p>
                     {notification.message && (
                       <p className="text-xs text-text-secondary line-clamp-2">{notification.message}</p>
                     )}
