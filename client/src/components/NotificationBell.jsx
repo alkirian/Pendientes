@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Check, ExternalLink } from 'lucide-react';
+import { Bell, Check, ExternalLink, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -108,6 +108,21 @@ export default function NotificationBell() {
 
     if (!error) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    }
+  };
+
+  // Clear all notifications
+  const clearAllNotifications = async () => {
+    if (!confirm('¿Eliminar todas las notificaciones?')) return;
+    
+    const { error } = await supabase
+      .from('notifications')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (!error) {
+      setNotifications([]);
       setUnreadCount(0);
     }
   };
@@ -223,15 +238,24 @@ export default function NotificationBell() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 border-t border-surface-border bg-surface-secondary">
+          <div className="px-4 py-2 border-t border-surface-border bg-surface-secondary flex items-center justify-between">
             <Link
               to="/notifications"
-              className="text-xs text-accent-blue hover:underline flex items-center justify-center gap-1"
+              className="text-xs text-accent-blue hover:underline flex items-center gap-1"
               onClick={() => setIsOpen(false)}
             >
-              Ver todas las notificaciones
+              Ver todas
               <ExternalLink size={10} />
             </Link>
+            {notifications.length > 0 && (
+              <button
+                onClick={clearAllNotifications}
+                className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition"
+              >
+                <Trash2 size={12} />
+                Limpiar todo
+              </button>
+            )}
           </div>
         </div>
       )}

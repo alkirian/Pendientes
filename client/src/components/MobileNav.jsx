@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { 
-  Menu, X, Home, Target, Archive, Bell, Settings, LogOut, 
+  Menu, X, Home, Archive, Bell, Settings, LogOut, 
   Sun, Moon, LayoutGrid, Users, List, ChevronRight 
 } from 'lucide-react';
 
@@ -15,8 +15,6 @@ export default function MobileNav({ viewMode, setViewMode }) {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
-    { path: '/focus', label: 'Mi Enfoque', icon: Target },
-    { path: '/archive', label: 'Archivo', icon: Archive },
     { path: '/notifications', label: 'Notificaciones', icon: Bell },
     { path: '/settings', label: 'Configuración', icon: Settings },
   ];

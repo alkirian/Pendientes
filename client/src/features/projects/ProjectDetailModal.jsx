@@ -165,6 +165,23 @@ export default function ProjectDetailModal({ isOpen, onClose, project, onUpdate 
     }
   };
 
+  const handleComplete = async () => {
+    if (!confirm('¿Marcar este proyecto como completado?')) return;
+    setLoading(true);
+    const { error } = await supabase
+      .from('projects')
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .eq('id', project.id);
+    setLoading(false);
+    if (error) {
+      showToast('Error al completar', 'error');
+    } else {
+      showToast('Proyecto completado ✓');
+      onUpdate();
+      onClose();
+    }
+  };
+
   const handleAddMember = async (user) => {
     const { error } = await supabase
       .from('project_members')
@@ -578,13 +595,22 @@ export default function ProjectDetailModal({ isOpen, onClose, project, onUpdate 
 
               {/* Footer */}
               <div className="flex items-center justify-between p-6 border-t border-surface-border">
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-500/10 rounded-lg transition text-sm"
-                >
-                  <Trash2 size={16} />
-                  Eliminar
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-500/10 rounded-lg transition text-sm"
+                  >
+                    <Trash2 size={16} />
+                    Eliminar
+                  </button>
+                  <button
+                    onClick={handleComplete}
+                    className="flex items-center gap-2 px-4 py-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition text-sm"
+                  >
+                    <Check size={16} />
+                    Completar
+                  </button>
+                </div>
                 <div className="flex gap-3">
                   <button
                     onClick={onClose}

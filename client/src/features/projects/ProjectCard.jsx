@@ -11,11 +11,12 @@ export default function ProjectCard({ project, onQuickAction, isUserDragging, is
   // Use uniqueId if provided, otherwise fall back to project.id
   const dragId = uniqueId || project.id;
 
-  const { attributes, listeners, setNodeRef: setDragRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id: dragId,
     data: { type: 'project', project, uniqueId: dragId },
     disabled: disableDrag
   });
+
 
   // Make project card a drop target for users - DISABLED when dragging a project
   const { setNodeRef: setDropRef, isOver } = useDroppable({
@@ -30,10 +31,8 @@ export default function ProjectCard({ project, onQuickAction, isUserDragging, is
     setDropRef(node);
   };
 
-  const style = transform ? {
-    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    zIndex: 1000,
-  } : undefined;
+  // No aplicamos transform aquí - dejamos que DragOverlay maneje el visual
+  // Solo marcamos el estado de isDragging para mostrar un placeholder
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -129,16 +128,17 @@ export default function ProjectCard({ project, onQuickAction, isUserDragging, is
 
   return (
     <div 
-      ref={setNodeRef} 
-      style={style}
+      ref={setNodeRef}
       onClick={handleCardClick}
       className={`
         group relative rounded-lg cursor-pointer
-        bg-surface-card border border-surface-border
+        bg-surface-card border-t border-r border-b border-surface-border
         border-l-4 ${priorityConfig[effectivePriority]?.borderColor}
-        ${isDragging ? 'opacity-20 grayscale border-dashed' : ''}
+        ${isDragging 
+          ? 'opacity-30 scale-95 ring-2 ring-dashed ring-accent-blue/50 bg-surface-secondary' 
+          : 'hover:border-surface-hover'
+        }
         ${isOver && isUserDragging ? 'ring-2 ring-green-400 scale-[1.01]' : ''}
-        hover:border-surface-hover
         transition-all duration-150 mb-3
       `}
     >

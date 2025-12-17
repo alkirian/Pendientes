@@ -3,7 +3,7 @@ import { DndContext, DragOverlay, useSensor, useSensors, PointerSensor } from '@
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams } from 'react-router-dom';
-import { LogOut, Plus, Briefcase, Target, Users as UsersIcon, List, LayoutGrid, Settings, Archive, Users } from 'lucide-react';
+import { LogOut, Plus, Briefcase, Users as UsersIcon, List, LayoutGrid, Settings, Archive, Users } from 'lucide-react';
 
 import MobileNav from '../components/MobileNav';
 import ProjectCard from '../features/projects/ProjectCard';
@@ -480,22 +480,6 @@ export default function DashboardPage() {
             
             {/* Center Section - Desktop Nav (hidden on mobile) */}
             <div className="hidden lg:flex items-center gap-4">
-              <a 
-                href="/focus"
-                className="flex items-center gap-2 text-text-secondary hover:text-accent-blue font-medium px-3 py-2 rounded-lg hover:bg-surface-hover transition"
-              >
-                <Target size={20} />
-                Mi Enfoque
-              </a>
-
-              <a 
-                href="/archive"
-                className="flex items-center gap-2 text-text-secondary hover:text-emerald-400 font-medium px-3 py-2 rounded-lg hover:bg-surface-hover transition"
-              >
-                <Archive size={20} />
-                Archivo
-              </a>
-
               {/* View Mode Toggle - Desktop (Nuevo diseño más intuitivo) */}
               <div className="flex items-center bg-surface-secondary/80 rounded-xl p-1.5 border border-surface-border">
                 {[
@@ -642,15 +626,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Drag Overlay */}
-        <DragOverlay dropAnimation={{ duration: 200, easing: 'ease-out' }}>
+        <DragOverlay dropAnimation={{ duration: 150, easing: 'ease-out' }}>
           {activeId && activeType === 'project' && activeData && (
-            <div className="rotate-2 scale-105 w-80 lg:w-96">
+            <div className="w-72 shadow-xl rounded-lg overflow-hidden ring-2 ring-accent-blue opacity-95">
               <ProjectCard project={activeData} disableDrag={true} />
             </div>
           )}
           
           {activeId && activeType === 'user' && activeData && (
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${getAvatarColor(activeData.full_name)} text-white font-medium`}>
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-lg ${getAvatarColor(activeData.full_name)} text-white font-medium`}>
               <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center font-bold">
                 {getInitial(activeData.full_name)}
               </div>
@@ -658,6 +642,7 @@ export default function DashboardPage() {
             </div>
           )}
         </DragOverlay>
+
 
         {/* Create Project Modal */}
         <CreateProjectModal 

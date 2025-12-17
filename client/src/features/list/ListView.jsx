@@ -55,14 +55,14 @@ function Avatar({ name, url, size = 'md', className = '' }) {
       <img 
         src={url} 
         alt={name} 
-        className={`${sizeClass} rounded-full object-cover ring-2 ring-[#1e1e2e] transition-all duration-300 ${className}`}
+        className={`${sizeClass} rounded-full object-cover ring-2 ring-surface-card transition-all duration-300 ${className}`}
         title={name}
       />
     );
   }
   return (
     <div 
-      className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-bold ring-2 ring-[#1e1e2e] transition-all duration-300 ${className}`}
+      className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-bold ring-2 ring-surface-card transition-all duration-300 ${className}`}
       title={name}
     >
       {name ? name.charAt(0).toUpperCase() : '?'}
@@ -74,7 +74,7 @@ function Avatar({ name, url, size = 'md', className = '' }) {
 function AvatarStack({ members }) {
   if (!members || members.length === 0) {
     return (
-      <span className="text-sm text-gray-600 flex items-center gap-1.5">
+      <span className="text-sm text-text-muted flex items-center gap-1.5">
         <User size={14} className="opacity-50" />
         <span>—</span>
       </span>
@@ -99,7 +99,7 @@ function AvatarStack({ members }) {
         ))}
         {extraCount > 0 && (
           <div 
-            className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center text-[10px] text-gray-300 font-medium ring-2 ring-[#1e1e2e]"
+            className="w-6 h-6 rounded-full bg-surface-secondary flex items-center justify-center text-[10px] text-text-muted font-medium ring-2 ring-surface-card"
             title={`+${extraCount} más`}
           >
             +{extraCount}
@@ -107,7 +107,7 @@ function AvatarStack({ members }) {
         )}
       </div>
       {/* First name */}
-      <span className="ml-2 text-sm text-gray-400 truncate transition-colors duration-300 group-hover:text-gray-300 max-w-[70px]">
+      <span className="ml-2 text-sm text-text-secondary truncate transition-colors duration-300 group-hover:text-text-primary max-w-[70px]">
         {members[0].name.split(' ')[0]}
       </span>
     </div>
@@ -221,22 +221,16 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
   };
 
   return (
-    <div className="h-full flex flex-col rounded-2xl overflow-hidden" style={{
-      background: 'linear-gradient(180deg, rgba(30,30,46,0.95) 0%, rgba(24,24,37,0.98) 100%)',
-      border: '1px solid rgba(255,255,255,0.08)'
-    }}>
+    <div className="h-full flex flex-col rounded-2xl overflow-hidden bg-surface-card border border-surface-border">
       {/* Header */}
-      <div className="px-5 py-4 flex items-center justify-between" style={{
-        background: 'linear-gradient(90deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.1) 50%, rgba(236,72,153,0.08) 100%)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)'
-      }}>
+      <div className="px-5 py-4 flex items-center justify-between bg-surface-secondary border-b border-surface-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
             <span className="text-lg">📋</span>
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white">Proyectos</h2>
-            <p className="text-xs text-gray-400">{sortedProjects.length} activos</p>
+            <h2 className="text-lg font-bold text-text-primary">Proyectos</h2>
+            <p className="text-xs text-text-muted">{sortedProjects.length} activos</p>
           </div>
         </div>
         
@@ -252,8 +246,8 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
               onClick={() => setFilterStatus(key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
                 filterStatus === key
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/25'
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'
+                  ? 'bg-accent-blue text-white shadow-lg'
+                  : 'bg-surface-hover text-text-secondary hover:bg-surface-hover hover:text-text-primary'
               }`}
             >
               {label}
@@ -263,20 +257,17 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
       </div>
 
       {/* Column Headers */}
-      <div className="px-5 py-3 flex items-center text-xs text-gray-500 font-semibold uppercase tracking-wider" style={{
-        background: 'rgba(0,0,0,0.2)',
-        borderBottom: '1px solid rgba(255,255,255,0.04)'
-      }}>
+      <div className="px-5 py-3 flex items-center text-xs text-text-muted font-semibold uppercase tracking-wider bg-surface-secondary/50 border-b border-surface-border">
         <div 
           className="w-10 flex-shrink-0 cursor-pointer group flex items-center justify-center"
           onClick={() => handleSort('priority')}
         >
-          <div className="w-2.5 h-2.5 rounded-full bg-gray-600 group-hover:bg-gray-400 transition-colors" />
+          <div className="w-2.5 h-2.5 rounded-full bg-text-muted group-hover:bg-text-secondary transition-colors" />
           {renderSortIndicator('priority')}
         </div>
         
         <div 
-          className="flex-1 min-w-0 cursor-pointer group flex items-center hover:text-gray-300 transition-colors"
+          className="flex-1 min-w-0 cursor-pointer group flex items-center hover:text-text-primary transition-colors"
           onClick={() => handleSort('name')}
         >
           Proyecto
@@ -284,7 +275,7 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
         </div>
         
         <div 
-          className="w-36 flex-shrink-0 cursor-pointer group flex items-center hover:text-gray-300 transition-colors"
+          className="w-36 flex-shrink-0 cursor-pointer group flex items-center hover:text-text-primary transition-colors"
           onClick={() => handleSort('client')}
         >
           Cliente
@@ -292,7 +283,7 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
         </div>
         
         <div 
-          className="w-40 flex-shrink-0 cursor-pointer group flex items-center hover:text-gray-300 transition-colors"
+          className="w-40 flex-shrink-0 cursor-pointer group flex items-center hover:text-text-primary transition-colors"
           onClick={() => handleSort('assignee')}
         >
           Responsable
@@ -300,7 +291,7 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
         </div>
         
         <div 
-          className="w-24 flex-shrink-0 text-right cursor-pointer group flex items-center justify-end hover:text-gray-300 transition-colors"
+          className="w-24 flex-shrink-0 text-right cursor-pointer group flex items-center justify-end hover:text-text-primary transition-colors"
           onClick={() => handleSort('deadline')}
         >
           Entrega
@@ -311,10 +302,10 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
       {/* Rows */}
       <div className="flex-1 overflow-y-auto">
         {sortedProjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+          <div className="flex flex-col items-center justify-center py-20 text-text-muted">
             <div className="text-5xl mb-4 opacity-50">📋</div>
-            <p className="font-medium text-gray-400">No hay proyectos</p>
-            <p className="text-sm mt-1 text-gray-600">Prueba cambiando los filtros</p>
+            <p className="font-medium text-text-secondary">No hay proyectos</p>
+            <p className="text-sm mt-1 text-text-muted">Prueba cambiando los filtros</p>
           </div>
         ) : (
           <div>
@@ -330,12 +321,8 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
                   isUserDragging={isUserDragging}
                 >
                   <div
-                    className="group px-5 py-3 flex items-center cursor-pointer transition-all duration-300 ease-out hover:scale-[1.01] hover:bg-white/[0.04]"
+                    className="group px-5 py-3 flex items-center cursor-pointer transition-all duration-300 ease-out hover:scale-[1.01] hover:bg-surface-hover border-b border-surface-border"
                     onClick={() => onOpenModal && onOpenModal(project)}
-                    style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.03)',
-                      transform: 'translateZ(0)',
-                    }}
                   >
                     {/* Priority Indicator */}
                     <div className="w-10 flex-shrink-0 flex items-center justify-center">
@@ -344,11 +331,11 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
 
                     {/* Project Name */}
                     <div className="flex-1 min-w-0 pr-4">
-                      <span className="font-medium text-sm text-gray-200 truncate block transition-all duration-300 group-hover:text-white group-hover:translate-x-1">
+                      <span className="font-medium text-sm text-text-primary truncate block transition-all duration-300 group-hover:translate-x-1">
                         {project.name}
                       </span>
                       {project.quick_note && (
-                        <span className="text-xs text-gray-500 truncate block mt-0.5 transition-colors duration-300 group-hover:text-gray-400">
+                        <span className="text-xs text-text-muted truncate block mt-0.5 transition-colors duration-300 group-hover:text-text-secondary">
                           📝 {project.quick_note}
                         </span>
                       )}
@@ -356,7 +343,7 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
 
                     {/* Client */}
                     <div className="w-36 flex-shrink-0 pr-3">
-                      <span className="text-sm text-gray-400 truncate block transition-colors duration-300 group-hover:text-gray-300">
+                      <span className="text-sm text-text-secondary truncate block transition-colors duration-300 group-hover:text-text-primary">
                         {project.client || '—'}
                       </span>
                     </div>
@@ -382,10 +369,7 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
 
       {/* Footer */}
       {sortedProjects.length > 0 && (
-        <div className="px-5 py-2.5 flex items-center justify-between text-xs text-gray-500" style={{
-          background: 'rgba(0,0,0,0.3)',
-          borderTop: '1px solid rgba(255,255,255,0.04)'
-        }}>
+        <div className="px-5 py-2.5 flex items-center justify-between text-xs text-text-muted bg-surface-secondary border-t border-surface-border">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-red-500" />
@@ -396,7 +380,7 @@ export default function ListView({ projects, onQuickAction, isUserDragging, onOp
               {sortedProjects.filter(p => calculateAutoPriority(p.deadline, p.priority) === 'medium').length} en progreso
             </span>
           </div>
-          <span className="text-gray-600">
+          <span className="text-text-muted">
             Click en columna para ordenar
           </span>
         </div>

@@ -11,7 +11,7 @@ const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_CONFIG = {
   high: {
     id: 'high',
-    label: 'Urgente',
+    label: 'Alta',
     emoji: '🔴',
     icon: AlertTriangle,
     bgColor: 'bg-red-500/10',
@@ -22,7 +22,7 @@ const PRIORITY_CONFIG = {
   },
   medium: {
     id: 'medium',
-    label: 'En Progreso',
+    label: 'Media',
     emoji: '🟠',
     icon: Clock,
     bgColor: 'bg-amber-500/10',
@@ -33,7 +33,7 @@ const PRIORITY_CONFIG = {
   },
   low: {
     id: 'low',
-    label: 'Normal',
+    label: 'Baja',
     emoji: '🟢',
     icon: CheckCircle2,
     bgColor: 'bg-emerald-500/10',
@@ -94,7 +94,7 @@ function PriorityLane({ config, projects, onQuickAction, isUserDragging, isProje
             {projects.map(project => (
               <div 
                 key={project.id} 
-                className={`border-l-4 ${config.accentColor} rounded-lg overflow-hidden`}
+                className="rounded-lg overflow-hidden"
               >
                 <ProjectCard
                   project={project}

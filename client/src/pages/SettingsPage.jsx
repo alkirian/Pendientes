@@ -220,6 +220,23 @@ const DangerZone = () => {
   
     return (
       <div className="mt-8 pt-8 border-t border-surface-border">
+        {/* Link to Completed Projects */}
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+            📋 Accesos Rápidos
+          </h2>
+          <a 
+            href="/archive"
+            className="flex items-center justify-between p-4 bg-surface-elevated rounded-lg border border-surface-border hover:bg-surface-hover hover:border-emerald-500/30 transition-all group"
+          >
+            <div>
+              <h3 className="font-medium text-text-primary group-hover:text-emerald-400 transition-colors">Proyectos Completados</h3>
+              <p className="text-sm text-text-muted">Ver el historial de proyectos finalizados.</p>
+            </div>
+            <span className="text-2xl">✅</span>
+          </a>
+        </div>
+
         <h2 className="text-lg font-bold text-red-600 mb-4 flex items-center gap-2">
           <AlertTriangle size={20} />
           Zona de Peligro

@@ -156,7 +156,7 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging, on
   function DraggableProjectRow({ project, isUnassigned, assignedUsers, getPriorityDot, getAvatarColor, getInitial }) {
     const uniqueId = isUnassigned ? `unassigned-${project.id}` : `compact-${project.id}`;
     
-    const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
       id: uniqueId,
       data: { 
         type: 'project', 
@@ -165,20 +165,19 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging, on
       }
     });
 
-    const style = transform ? {
-      transform: `translate(${transform.x}px, ${transform.y}px)`,
-      zIndex: 50
-    } : undefined;
+    // No transform - dejamos que DragOverlay maneje el visual
 
     return (
       <div 
         ref={setNodeRef}
-        style={style}
         {...listeners}
         {...attributes}
-        className={`flex items-center gap-2 px-3 py-2.5 hover:bg-surface-hover cursor-grab active:cursor-grabbing transition-colors group ${
-          isUnassigned ? 'bg-surface-secondary/50' : ''
-        } ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
+        className={`flex items-center gap-2 px-3 py-2.5 cursor-grab active:cursor-grabbing transition-all group ${
+          isUnassigned ? 'bg-surface-secondary/50' : 'hover:bg-surface-hover'
+        } ${isDragging 
+          ? 'opacity-30 bg-accent-blue/10 ring-1 ring-dashed ring-accent-blue/50' 
+          : ''
+        }`}
       >
         {/* Priority Dot */}
         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityDot(project)}`} />
@@ -223,6 +222,7 @@ export default function PeopleView({ projects, onQuickAction, isUserDragging, on
       </div>
     );
   }
+
 
   // Compact "All Projects" panel component
   function CompactAllProjectsPanel({ allProjects, unassignedIds }) {

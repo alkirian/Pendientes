@@ -4,7 +4,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
-import MyFocusPage from './pages/MyFocusPage';
 import CompleteProfilePage from './pages/CompleteProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import ArchivedPage from './pages/ArchivedPage';
@@ -47,11 +46,6 @@ function App() {
           <Route path="/" element={
             <RequireProfileRoute>
               <DashboardPage />
-            </RequireProfileRoute>
-          } />
-          <Route path="/focus" element={
-            <RequireProfileRoute>
-               <MyFocusPage />
             </RequireProfileRoute>
           } />
           <Route path="/settings" element={
